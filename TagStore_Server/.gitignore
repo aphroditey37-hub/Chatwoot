@@ -1,0 +1,41 @@
+# Node modules (always ignore!)
+node_modules/
+
+# Local environment variables
+.env
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Multer/Uploads temp files
+uploads/
+
+# IDE / editor junk
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Build outputs (if you ever use them)
+dist/
+build/
+
+# Coverage reports (if you use testing)
+coverage/
+
+# Misc
+*.swp
+
+# Mac OS clutter
+._*
+
+# Optional: Ignore test snapshots
+__snapshots__/

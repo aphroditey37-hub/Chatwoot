@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Telegram Reviewer Admin</title>
+
+        <style>
+            :root {
+                --bg: #020617;
+                --card: #020617;
+                --border: #334155;
+                --text: #e5e7eb;
+                --muted: #94a3b8;
+                --primary: #2563eb;
+                --primary-hover: #1d4ed8;
+                --danger: #dc2626;
+                --success: #16a34a;
+            }
+
+            * {
+                box-sizing: border-box;
+            }
+
+            body {
+                margin: 0;
+                padding: 20px;
+                font-family:
+                    system-ui,
+                    -apple-system,
+                    BlinkMacSystemFont,
+                    sans-serif;
+                background: linear-gradient(180deg, #020617, #020617);
+                color: var(--text);
+            }
+
+            .container {
+                max-width: 1100px;
+                margin: auto;
+            }
+
+            h1 {
+                margin-bottom: 5px;
+                font-size: 28px;
+            }
+
+            .subtitle {
+                color: var(--muted);
+                margin-bottom: 25px;
+                font-size: 14px;
+            }
+
+            .grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            @media (min-width: 900px) {
+                .grid {
+                    grid-template-columns: 380px 1fr;
+                }
+            }
+
+            .card {
+                background: var(--card);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 20px;
+            }
+
+            .card h2 {
+                margin-top: 0;
+                font-size: 18px;
+            }
+
+            label {
+                display: block;
+                font-size: 13px;
+                color: var(--muted);
+                margin-top: 14px;
+                margin-bottom: 4px;
+            }
+
+            input {
+                width: 100%;
+                padding: 10px 12px;
+                border-radius: 8px;
+                border: 1px solid var(--border);
+                background: #020617;
+                color: var(--text);
+                font-size: 14px;
+            }
+
+            input::placeholder {
+                color: #64748b;
+            }
+
+            button {
+                margin-top: 16px;
+                width: 100%;
+                padding: 12px;
+                border-radius: 10px;
+                border: none;
+                background: var(--primary);
+                color: white;
+                font-size: 15px;
+                cursor: pointer;
+                transition: background 0.2s ease;
+            }
+
+            button:hover {
+                background: var(--primary-hover);
+            }
+
+            .status {
+                margin-top: 10px;
+                font-size: 13px;
+            }
+
+            .status.success {
+                color: var(--success);
+            }
+            .status.error {
+                color: var(--danger);
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10px;
+            }
+
+            th,
+            td {
+                padding: 12px 10px;
+                border-bottom: 1px solid var(--border);
+                text-align: left;
+                font-size: 14px;
+            }
+
+            th {
+                color: var(--muted);
+                font-weight: 500;
+                font-size: 12px;
+                text-transform: uppercase;
+            }
+
+            .remove-btn {
+                background: transparent;
+                border: 1px solid var(--danger);
+                color: var(--danger);
+                padding: 6px 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 12px;
+            }
+
+            .remove-btn:hover {
+                background: var(--danger);
+                color: white;
+            }
+
+            .helper {
+                font-size: 12px;
+                color: var(--muted);
+                margin-top: 10px;
+            }
+
+            .footer {
+                text-align: center;
+                margin-top: 30px;
+                font-size: 12px;
+                color: var(--muted);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Telegram Reviewer Admin</h1>
+            <div class="subtitle">Manage who can access your Telegram bot</div>
+
+            <div class="grid">
+                <!-- ADD REVIEWER -->
+                <div class="card">
+                    <h2>Add Reviewer</h2>
+
+                    <label>Username (required)</label>
+                    <input id="username" placeholder="@username (required)" />
+
+                    <button onclick="addReviewer()">Add Reviewer</button>
+                    <div id="addStatus" class="status"></div>
+
+                    <div class="helper">
+                        Enter the Telegram username without spaces (e.g.
+                        <code>@john_doe</code>)
+                    </div>
+                </div>
+
+                <!-- REVIEWER LIST -->
+                <div class="card">
+                    <h2>Current Reviewers</h2>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Added</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="reviewerTable"></tbody>
+                    </table>
+
+                    <div id="listStatus" class="status"></div>
+                </div>
+            </div>
+
+            <div class="footer">
+                Telegram Reviewer System • Production Ready
+            </div>
+        </div>
+
+        <script>
+            async function api(path, options = {}) {
+                const res = await fetch("/" + path, {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "same-origin",
+                    ...options,
+                });
+                return res.json();
+            }
+
+            function setStatus(el, msg, ok = true) {
+                el.textContent = msg;
+                el.className = "status " + (ok ? "success" : "error");
+            }
+
+            async function loadReviewers() {
+                try {
+                    const data = await api("list");
+                    if (!data.ok) throw new Error("Failed to load reviewers");
+
+                    const tbody = document.getElementById("reviewerTable");
+                    tbody.innerHTML = "";
+
+                    data.reviewers.forEach((r) => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `
+            <td>${r.username ?? "-"}</td>
+            <td>${
+                r.createdAt ? new Date(r.createdAt).toLocaleString() : "-"
+            }</td>
+            <td>
+              <button class="remove-btn" onclick="removeReviewer('${r.username}')">
+                Remove
+              </button>
+            </td>
+          `;
+                        tbody.appendChild(tr);
+                    });
+                } catch (err) {
+                    setStatus(
+                        document.getElementById("listStatus"),
+                        err.message,
+                        false,
+                    );
+                }
+            }
+
+            async function addReviewer() {
+                let username = document.getElementById("username").value.trim();
+                const status = document.getElementById("addStatus");
+
+                if (!username) {
+                    setStatus(status, "Telegram username is required", false);
+                    return;
+                }
+
+                if (!username.startsWith("@")) {
+                    username = "@" + username;
+                }
+
+                if (!username) {
+                    setStatus(status, "Telegram username is required", false);
+                    return;
+                }
+
+                try {
+                    const res = await api("add", {
+                        method: "POST",
+                        body: JSON.stringify({ username }),
+                    });
+
+                    if (!res.ok)
+                        throw new Error(res.message || "Failed to add");
+
+                    setStatus(status, "Reviewer added successfully");
+                    document.getElementById("username").value = "";
+                    loadReviewers();
+                } catch (err) {
+                    setStatus(status, err.message, false);
+                }
+            }
+
+            async function removeReviewer(username) {
+                if (!confirm("Remove this reviewer?")) return;
+
+                try {
+                    await api("remove", {
+                        method: "POST",
+                        body: JSON.stringify({ username: username }),
+                    });
+                    loadReviewers();
+                } catch (err) {
+                    alert("Failed to remove reviewer");
+                }
+            }
+
+            loadReviewers();
+            setInterval(loadReviewers, 10000);
+        </script>
+    </body>
+</html>
