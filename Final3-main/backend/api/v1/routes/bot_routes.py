@@ -1018,6 +1018,7 @@ async def generate_magic_link_bot(
     await check_rate_limiting(request)
     
     from ..core.security import create_jwt_token
+    from datetime import timedelta
     
     # Get user
     user = await fetch_one("""
@@ -1038,7 +1039,7 @@ async def generate_magic_link_bot(
     }
     
     # Create token with short expiry (15 minutes)
-    magic_token = create_jwt_token(token_data, expires_minutes=15)
+    magic_token = create_jwt_token(token_data, expires_delta=timedelta(minutes=15))
     
     # Build magic link URL
     portal_url = settings.portal_url or settings.frontend_url or "https://portal.example.com"
