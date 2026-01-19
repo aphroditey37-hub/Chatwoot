@@ -105,6 +105,10 @@ class APIv1Settings(BaseSettings):
     telegram_webhook_secret: Optional[str] = None
     telegram_chat_id: Optional[str] = None
     
+    # ==================== Portal/Frontend URLs ====================
+    portal_url: str = "http://localhost:3000"
+    frontend_url: str = "http://localhost:3000"
+    
     # ==================== CORS ====================
     cors_origins: str = "*"  # Comma-separated origins - MUST NOT be "*" in production
     
