@@ -1,0 +1,228 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Floating Pill Navigation + Soft Card Design System */
+  :root {
+    /* Background - Deep Slate */
+    --background: 220 20% 12%;
+    --background-secondary: 220 18% 15%;
+    
+    /* Surfaces - Soft Elevated Cards */
+    --surface-primary: 220 15% 18%;
+    --surface-secondary: 220 12% 22%;
+    --surface-elevated: 220 13% 20%;
+    
+    /* Text Colors */
+    --foreground: 220 10% 98%;
+    --text-secondary: 220 10% 70%;
+    --text-muted: 220 8% 50%;
+    --text-dim: 220 6% 35%;
+    
+    /* Accent - Soft Teal */
+    --primary: 180 75% 45%;
+    --primary-hover: 180 75% 40%;
+    --primary-soft: 180 75% 45% / 0.15;
+    --primary-border: 180 75% 45% / 0.3;
+    
+    /* Secondary - Calm Blue */
+    --secondary: 210 70% 50%;
+    --secondary-hover: 210 70% 45%;
+    
+    /* Status Colors */
+    --success: 160 75% 45%;
+    --success-bg: 160 75% 45% / 0.15;
+    --warning: 40 90% 55%;
+    --warning-bg: 40 90% 55% / 0.15;
+    --error: 0 75% 60%;
+    --error-bg: 0 75% 60% / 0.15;
+    --info: 210 85% 60%;
+    --info-bg: 210 85% 60% / 0.15;
+    
+    /* Borders */
+    --border: 220 15% 25%;
+    --border-soft: 220 12% 30%;
+    --border-subtle: 220 10% 20%;
+    
+    /* Shadows - Soft Floating */
+    --shadow-soft: 0 2px 8px hsl(220 20% 5% / 0.3);
+    --shadow-float: 0 8px 24px hsl(220 20% 5% / 0.4), 0 2px 8px hsl(220 20% 5% / 0.2);
+    --shadow-float-lg: 0 12px 40px hsl(220 20% 5% / 0.5), 0 4px 12px hsl(220 20% 5% / 0.3);
+    --shadow-glow-teal: 0 0 20px hsl(var(--primary) / 0.3);
+    
+    /* Radii - Pill Navigation */
+    --radius-pill: 22px;
+    --radius-card: 16px;
+    --radius-input: 14px;
+    --radius-sm: 10px;
+    --radius-full: 9999px;
+    
+    /* Spacing */
+    --spacing-page: 24px;
+    --spacing-card: 20px;
+    --spacing-section: 16px;
+    
+    /* Chart Colors */
+    --chart-1: 180 75% 45%;
+    --chart-2: 210 70% 50%;
+    --chart-3: 270 65% 55%;
+    --chart-4: 40 90% 55%;
+    --chart-5: 160 75% 45%;
+    
+    /* Component Tokens */
+    --card: var(--surface-primary);
+    --card-foreground: var(--foreground);
+    --popover: var(--surface-elevated);
+    --popover-foreground: var(--foreground);
+    --muted: var(--surface-secondary);
+    --muted-foreground: var(--text-muted);
+    --accent: var(--primary);
+    --accent-foreground: 220 10% 98%;
+    --destructive: var(--error);
+    --destructive-foreground: 220 10% 98%;
+    --input: var(--border);
+    --ring: var(--primary);
+    --radius: var(--radius-card);
+  }
+}
+
+/* Reset and base styles */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+}
+
+/* Prevent zoom on form inputs on iOS */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Custom scrollbar - Soft Style */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--surface-primary));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--border-soft));
+}
+
+/* Prevent pull-to-refresh on mobile */
+body {
+  overscroll-behavior-y: contain;
+}
+
+/* Selection color */
+::selection {
+  background: hsl(var(--primary-soft));
+  color: hsl(var(--foreground));
+}
+
+/* Focus styles - Soft Glow */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  box-shadow: var(--shadow-glow-teal);
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+/* Safe area padding for notched devices */
+@supports (padding: max(0px)) {
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Disable double-tap zoom */
+* {
+  touch-action: manipulation;
+}
+
+/* Smooth transitions */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}

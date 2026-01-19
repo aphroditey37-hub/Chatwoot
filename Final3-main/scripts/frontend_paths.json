@@ -1,0 +1,652 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/stats",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/dashboard",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/clients",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/clients/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/clients",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/clients/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/clients/{param}/overrides",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/clients/{param}/overrides",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/clients/{param}/activity",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/clients/{param}/credentials",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/clients/{param}/credentials",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/analytics/game/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/analytics/risk-snapshot",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/analytics/risk-exposure",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/analytics/platform-trends",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/analytics/advanced-metrics",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/orders",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/orders/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/approvals/{param}/action",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/approvals/pending",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/system/wallet-loads",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/system/wallet-loads/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/system/payment-methods",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/system/payment-methods",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/system/payment-methods/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/admin/system/payment-methods/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/system/payment-qr",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/system/payment-qr",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/admin/system/payment-qr/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/admin/system/payment-qr/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/system/api-keys",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/system/api-keys",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/admin/system/api-keys/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/system/webhooks",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/system/webhooks",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/system/webhooks/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/admin/system/webhooks/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/system/webhooks/{param}/deliveries",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/system/settings",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/rules",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/games",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/games/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/rules",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/rules",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/promo-codes",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/promo-codes",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/promo-codes/{param}/disable",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/promo-codes/{param}/redemptions",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/referrals/dashboard",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/referrals/ledger",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/reports/balance-flow",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/reports/profit-by-game",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/reports/voids",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/audit-logs",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/balance-control/load",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/balance-control/withdraw",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/telegram/bots",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/telegram/bots",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/telegram/bots/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/admin/telegram/bots/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/telegram/bots/{param}/test",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/telegram/events",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/telegram/bots/{param}/permissions",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/telegram/bots/{param}/permissions",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/telegram/logs",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/telegram/setup-webhook",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/telegram/webhook-info",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/rewards",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/rewards/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/rewards",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/rewards/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/admin/rewards/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/rewards/grant",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/rewards/grants/history",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/rewards/trigger/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/referral-tiers/tiers",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/referral-tiers/tiers/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/referral-tiers/global-overrides",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/referral-tiers/global-overrides",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/referral-tiers/global-overrides/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/admin/referral-tiers/global-overrides/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/referral-tiers/client-overrides",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/referral-tiers/client-overrides",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/referral-tiers/client-overrides/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/admin/referral-tiers/client-overrides/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/referral-tiers/effective-bonus/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/referral-tiers/my-tier",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/promotions/active",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/promotions/track-view/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/promotions/track-click/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/promotions/admin/all",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/promotions/admin/stats",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/promotions/admin",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/promotions/admin/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/promotions/admin/{param}",
+    "source": "src/api/admin.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/login",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/signup",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/validate-token",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/auth/profile",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/auth/change-password",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/wallet/balance",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portal/wallet/breakdown",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portal/wallet/bonus-progress",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portal/wallet/cashout-preview",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/wallet/load-history",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/wallet/ledger",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/wallet/qr",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/wallet-load/request",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/withdrawal/wallet",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portal/transactions/enhanced",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/orders",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/orders/{param}",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/public/games",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/games/available",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/game-accounts/my-accounts",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/game-accounts/create",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/game-accounts/load",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/game-accounts/redeem",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portal/referrals/details",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portal/rewards",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/portal/promo/redeem",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portal/promo/history",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portal/credits/welcome",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/portal/credits/welcome/claim",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portal/credentials",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/portal/security/set-password",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/portal/games/rules",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/system",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/admin/system",
+    "source": "src/api/endpoints.js"
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/games",
+    "source": "src/api/endpoints.js"
+  }
+]

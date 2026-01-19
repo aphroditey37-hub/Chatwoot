@@ -1,0 +1,171 @@
+# =============================================================================
+# PRODUCTION Docker Compose Configuration
+# =============================================================================
+# 
+# SECURITY HARDENED for production deployment:
+# - PostgreSQL NOT exposed to host
+# - No default credentials (all via environment variables)
+# - No code bind mounts (uses built images)
+# - Internal network only
+# - Healthchecks enabled
+#
+# REQUIRED ENVIRONMENT VARIABLES (set before running):
+# - POSTGRES_PASSWORD (strong password for database)
+# - JWT_SECRET_KEY (>= 32 chars)
+# - INTERNAL_API_SECRET (>= 32 chars)
+# - WEBHOOK_SIGNING_SECRET (>= 32 chars)
+# - BOT_API_TOKEN (>= 32 chars, if bot routes enabled)
+# - CORS_ORIGINS (comma-separated allowed origins, NO wildcards)
+# - TRUSTED_HOSTS (comma-separated allowed hosts, NO wildcards)
+# - REACT_APP_BACKEND_URL (frontend API URL)
+#
+# USAGE:
+#   # Set required environment variables first
+#   export POSTGRES_PASSWORD="your-strong-db-password-here"
+#   export JWT_SECRET_KEY="your-jwt-secret-at-least-32-chars"
+#   export INTERNAL_API_SECRET="your-internal-secret-at-least-32"
+#   export WEBHOOK_SIGNING_SECRET="your-webhook-secret-at-least-32"
+#   export BOT_API_TOKEN="your-bot-token-at-least-32-chars"
+#   export CORS_ORIGINS="https://yourdomain.com"
+#   export TRUSTED_HOSTS="yourdomain.com,www.yourdomain.com"
+#   export REACT_APP_BACKEND_URL="https://api.yourdomain.com"
+#   
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# =============================================================================
+
+version: '3.8'
+
+services:
+  # =========================================================================
+  # PostgreSQL Database
+  # - NOT exposed to host (internal network only)
+  # - Credentials from environment variables (no defaults)
+  # - Persistent volume for data
+  # =========================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: gaming-platform-db-prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gamingadmin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-portal_db}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    # NO ports exposed - internal only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gamingadmin} -d ${POSTGRES_DB:-portal_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - gaming-platform-internal
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # =========================================================================
+  # Backend API
+  # - Uses built image (no bind mounts)
+  # - Production environment with strict validation
+  # - All secrets from environment variables
+  # =========================================================================
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: gaming-platform-backend-prod
+    environment:
+      # Environment mode
+      ENV: production
+      
+      # Database (internal connection)
+      DATABASE_URL: postgresql://${POSTGRES_USER:-gamingadmin}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-portal_db}
+      
+      # Required secrets (fail-fast if not set)
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY is required (>= 32 chars)}
+      INTERNAL_API_SECRET: ${INTERNAL_API_SECRET:?INTERNAL_API_SECRET is required (>= 32 chars)}
+      WEBHOOK_SIGNING_SECRET: ${WEBHOOK_SIGNING_SECRET:?WEBHOOK_SIGNING_SECRET is required (>= 32 chars)}
+      BOT_API_TOKEN: ${BOT_API_TOKEN:-}
+      
+      # Security settings (no wildcards in production)
+      CORS_ORIGINS: ${CORS_ORIGINS:?CORS_ORIGINS is required (no wildcards)}
+      TRUSTED_HOSTS: ${TRUSTED_HOSTS:?TRUSTED_HOSTS is required (no wildcards)}
+      
+      # Telegram (optional)
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      
+      # Database pool
+      DB_POOL_MIN: ${DB_POOL_MIN:-5}
+      DB_POOL_MAX: ${DB_POOL_MAX:-20}
+      
+      # Feature flags
+      ENABLE_BOT_ROUTES: ${ENABLE_BOT_ROUTES:-true}
+      ENABLE_ADMIN_ROUTES: ${ENABLE_ADMIN_ROUTES:-true}
+      ENABLE_PUBLIC_ROUTES: ${ENABLE_PUBLIC_ROUTES:-true}
+      
+      # API docs (disabled by default in production)
+      ENABLE_DOCS: ${ENABLE_DOCS:-false}
+    ports:
+      - "${BACKEND_PORT:-8001}:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # NO volume bind mounts - use built image
+    networks:
+      - gaming-platform-internal
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # =========================================================================
+  # Frontend
+  # - Uses built image (no bind mounts)
+  # - Backend URL injected at build time
+  # =========================================================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL:?REACT_APP_BACKEND_URL is required}
+    container_name: gaming-platform-frontend-prod
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - gaming-platform-internal
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+volumes:
+  postgres_data_prod:
+    driver: local
+
+networks:
+  gaming-platform-internal:
+    driver: bridge
+    internal: false  # Set to true if using external reverse proxy

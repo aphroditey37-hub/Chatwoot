@@ -1,0 +1,82 @@
+# =============================================================================
+# DEVELOPMENT Docker Compose Configuration
+# =============================================================================
+#
+# This configuration is for LOCAL DEVELOPMENT ONLY.
+# DO NOT use in production!
+#
+# Features:
+# - PostgreSQL exposed on localhost:5432 for local tools
+# - Default credentials (postgres/postgres)
+# - Code bind mounts for hot reload
+#
+# For production, use docker-compose.prod.yml instead.
+#
+# USAGE:
+#   docker compose up -d
+#
+# =============================================================================
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: gaming-platform-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: portal_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - gaming-platform
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: gaming-platform-backend
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/portal_db
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - gaming-platform
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        REACT_APP_BACKEND_URL: ${REACT_APP_BACKEND_URL:-http://localhost:8001}
+    container_name: gaming-platform-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - gaming-platform
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  gaming-platform:
+    driver: bridge

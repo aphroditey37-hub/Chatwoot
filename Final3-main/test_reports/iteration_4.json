@@ -1,0 +1,90 @@
+{
+  "summary": "Frontend testing completed for P1-1 Promo & Bonus Admin Controls. Fixed critical routing bug - missing route for promo detail page. Fixed UX bug - modal not closing on API error. Backend is missing enable endpoint (404).",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "PUT /api/v1/admin/promo-codes/{codeId}/enable",
+        "issue": "Endpoint returns 404 - not implemented in backend",
+        "priority": "HIGH"
+      },
+      {
+        "endpoint": "GET /api/v1/admin/promo-codes/{codeId}",
+        "issue": "Endpoint returns 404 - not implemented in backend (frontend uses fallback to list all and filter)",
+        "priority": "MEDIUM"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Enable promo code",
+        "issue": "Enable action fails with 404 because backend endpoint doesn't exist",
+        "affected_selectors": ["[data-testid^='enable-']", "button:has-text('Enable')"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/test_reports/iteration_4.json"
+  ],
+  "action_items": [
+    "Add PUT /api/v1/admin/promo-codes/{codeId}/enable endpoint to backend",
+    "Add GET /api/v1/admin/promo-codes/{codeId} endpoint to backend (optional - frontend has fallback)"
+  ],
+  "critical_code_review_comments": [
+    "Fixed: Missing route for /admin/promo-codes/:codeId in App.js - was causing redirect to /games",
+    "Fixed: Modal not closing on API error in AdminPromoCodes.js and AdminPromoDetail.js - moved closeConfirmation() to finally block"
+  ],
+  "updated_files": [
+    "/app/frontend/src/App.js",
+    "/app/frontend/src/pages/admin/AdminPromoCodes.js",
+    "/app/frontend/src/pages/admin/AdminPromoDetail.js"
+  ],
+  "success_rate": {
+    "backend": "N/A - frontend only testing",
+    "frontend": "90%"
+  },
+  "seed_data_creation": "Created test promo code UITEST1163 with $15 amount, 50 max redemptions",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "P1-1 Promo Codes frontend is working. Backend needs enable endpoint. Disable endpoint works (PUT /api/v1/admin/promo-codes/{codeId}/disable). Create endpoint works. List endpoint works. Redemptions endpoint works.",
+  "features_tested": [
+    "Admin Promo Codes list page at /admin/promo-codes - PASS",
+    "Table displays promo codes with all columns (Code, Description, Amount, Usage, Status, Expires, Created, Actions) - PASS",
+    "Search filter works (search by code or description) - PASS",
+    "Status filter works (All/Active/Disabled/Expired) - PASS",
+    "Create promo code form opens when clicking Create Code button - PASS",
+    "Create promo code form submission works - PASS",
+    "View Details button navigates to /admin/promo-codes/:codeId - PASS (after route fix)",
+    "Promo Detail page shows promo metadata (code, amount, redemptions, dates) - PASS",
+    "Promo Detail page shows redemption history table - PASS",
+    "Enable/Disable buttons show confirmation modal - PASS",
+    "Disable action works after confirmation - PASS",
+    "Enable action fails - FAIL (backend 404)",
+    "All API calls use centralized admin API - PASS",
+    "Loading states display during data fetching - PASS",
+    "Error states display when API calls fail - PASS (modal now closes on error)"
+  ],
+  "bugs_fixed": [
+    {
+      "file": "/app/frontend/src/App.js",
+      "issue": "Missing route for /admin/promo-codes/:codeId causing redirect to /games",
+      "fix": "Added import for AdminPromoDetail and route definition"
+    },
+    {
+      "file": "/app/frontend/src/pages/admin/AdminPromoCodes.js",
+      "issue": "Confirmation modal doesn't close when API call fails",
+      "fix": "Moved closeConfirmation() to finally block"
+    },
+    {
+      "file": "/app/frontend/src/pages/admin/AdminPromoDetail.js",
+      "issue": "Confirmation modal doesn't close when API call fails",
+      "fix": "Moved closeConfirmation() to finally block"
+    }
+  ],
+  "test_credentials": {
+    "admin": {"username": "admin", "password": "admin123"}
+  }
+}
