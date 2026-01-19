@@ -814,3 +814,359 @@ async def log_audit(user_id, username, action, resource_type, resource_id, detai
         VALUES ($1, $2, $3, $4, $5, $6, $7)
     ''', log_id, user_id, username, action, resource_type, resource_id,
        json.dumps(details) if details else None)
+
+
+# ==================== NEW BOT ENDPOINTS ====================
+
+@router.get(
+    "/user/{user_id}/credentials",
+    summary="Get user game credentials",
+    description="Get all game credentials for a user"
+)
+async def get_user_credentials_bot(
+    request: Request,
+    user_id: str,
+    game_name: Optional[str] = None,
+    authorization: str = Header(..., alias="Authorization")
+):
+    """
+    Get user's game credentials - requires bot auth.
+    Returns game usernames and passwords for the user's game accounts.
+    """
+    await require_bot_auth(authorization)
+    await check_rate_limiting(request)
+    
+    # Check if user exists
+    user = await fetch_one("SELECT user_id, username FROM users WHERE user_id = $1", user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if game_accounts table exists
+    table_exists = await fetch_one("""
+        SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'game_accounts'
+        ) as exists
+    """)
+    
+    if not table_exists or not table_exists.get('exists'):
+        return {"success": True, "credentials": [], "message": "No game accounts found"}
+    
+    # Build query
+    if game_name:
+        accounts = await fetch_all("""
+            SELECT ga.game_id, ga.game_name, g.display_name, 
+                   ga.game_username, ga.game_password, ga.balance
+            FROM game_accounts ga
+            LEFT JOIN games g ON ga.game_id = g.game_id
+            WHERE ga.user_id = $1 AND LOWER(ga.game_name) = LOWER($2)
+            ORDER BY ga.created_at DESC
+        """, user_id, game_name)
+    else:
+        accounts = await fetch_all("""
+            SELECT ga.game_id, ga.game_name, g.display_name, 
+                   ga.game_username, ga.game_password, ga.balance
+            FROM game_accounts ga
+            LEFT JOIN games g ON ga.game_id = g.game_id
+            WHERE ga.user_id = $1
+            ORDER BY ga.created_at DESC
+        """, user_id)
+    
+    return {
+        "success": True,
+        "credentials": [{
+            "game_id": acc['game_id'],
+            "game_name": acc['game_name'],
+            "display_name": acc.get('display_name') or acc['game_name'],
+            "game_username": acc['game_username'],
+            "game_password": acc['game_password'],
+            "balance": float(acc['balance'] or 0)
+        } for acc in accounts]
+    }
+
+
+@router.get(
+    "/user/{user_id}/referral",
+    summary="Get user referral info",
+    description="Get referral program information for a user"
+)
+async def get_user_referral_bot(
+    request: Request,
+    user_id: str,
+    authorization: str = Header(..., alias="Authorization")
+):
+    """
+    Get user's referral program information - requires bot auth.
+    Returns referral code, commission rate, and earnings.
+    """
+    await require_bot_auth(authorization)
+    await check_rate_limiting(request)
+    
+    # Get user with referral code
+    user = await fetch_one("""
+        SELECT user_id, username, display_name, referral_code 
+        FROM users WHERE user_id = $1
+    """, user_id)
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    referral_code = user.get('referral_code', '')
+    
+    # Get system settings for commission rates
+    settings_row = await fetch_one("SELECT * FROM system_settings WHERE id = 'global'")
+    base_commission = 5.0  # Default 5%
+    if settings_row:
+        base_commission = float(settings_row.get('referral_commission_percent', 5))
+    
+    # Tier system
+    tiers = [
+        {"tier": 0, "name": "Starter", "min_refs": 0, "commission": 5},
+        {"tier": 1, "name": "Bronze", "min_refs": 10, "commission": 10},
+        {"tier": 2, "name": "Silver", "min_refs": 25, "commission": 15},
+        {"tier": 3, "name": "Gold", "min_refs": 50, "commission": 20},
+        {"tier": 4, "name": "Platinum", "min_refs": 100, "commission": 25},
+        {"tier": 5, "name": "Diamond", "min_refs": 200, "commission": 30},
+    ]
+    
+    # Count active referrals (users who used this code and have deposited)
+    active_count = await fetch_one("""
+        SELECT COUNT(DISTINCT u.user_id) as count
+        FROM users u
+        WHERE u.referred_by = $1
+        AND EXISTS (
+            SELECT 1 FROM orders o 
+            WHERE o.user_id = u.user_id 
+            AND o.order_type = 'deposit' 
+            AND o.status IN ('approved', 'completed', 'APPROVED_EXECUTED')
+        )
+    """, referral_code)
+    
+    active_refs = active_count['count'] if active_count else 0
+    
+    # Determine current tier
+    current_tier = tiers[0]
+    for tier in tiers:
+        if active_refs >= tier['min_refs']:
+            current_tier = tier
+    
+    # Calculate earnings
+    pending_earnings = await fetch_one("""
+        SELECT COALESCE(SUM(o.amount * $2 / 100), 0) as pending
+        FROM users u
+        JOIN orders o ON u.user_id = o.user_id
+        WHERE u.referred_by = $1 
+        AND o.order_type = 'deposit' 
+        AND o.status IN ('pending_review', 'pending_approval', 'awaiting_payment_proof')
+    """, referral_code, current_tier['commission'])
+    
+    confirmed_earnings = await fetch_one("""
+        SELECT COALESCE(SUM(o.amount * $2 / 100), 0) as confirmed
+        FROM users u
+        JOIN orders o ON u.user_id = o.user_id
+        WHERE u.referred_by = $1 
+        AND o.order_type = 'deposit' 
+        AND o.status IN ('approved', 'completed', 'APPROVED_EXECUTED')
+    """, referral_code, current_tier['commission'])
+    
+    return {
+        "success": True,
+        "referral_code": referral_code,
+        "commission_percent": current_tier['commission'],
+        "tier_name": current_tier['name'],
+        "tier_level": current_tier['tier'],
+        "active_referrals": active_refs,
+        "pending_earnings": round(float(pending_earnings['pending'] or 0), 2),
+        "confirmed_earnings": round(float(confirmed_earnings['confirmed'] or 0), 2),
+        "total_earnings": round(
+            float(pending_earnings['pending'] or 0) + 
+            float(confirmed_earnings['confirmed'] or 0), 2
+        ),
+        "tiers": tiers,
+        "rules": [
+            "Share your referral code with friends",
+            "They enter it when signing up",
+            "Once they make their first deposit, they become 'active'",
+            f"You earn {current_tier['commission']}% of ALL their future deposits",
+            "Earnings are automatic and lifetime",
+            "Get more active referrals to unlock higher commission tiers"
+        ]
+    }
+
+
+class MagicLinkBotRequest(BaseModel):
+    """Bot magic link request"""
+    user_id: str = Field(..., description="User ID to generate magic link for")
+
+
+@router.post(
+    "/magic-link",
+    summary="Generate magic link for user",
+    description="Generate a passwordless login link for a user"
+)
+async def generate_magic_link_bot(
+    request: Request,
+    data: MagicLinkBotRequest,
+    authorization: str = Header(..., alias="Authorization")
+):
+    """
+    Generate a magic link for a user - requires bot auth.
+    This allows the bot to send users a direct login link.
+    """
+    await require_bot_auth(authorization)
+    await check_rate_limiting(request)
+    
+    from ..core.security import create_jwt_token
+    
+    # Get user
+    user = await fetch_one("""
+        SELECT user_id, username, display_name, referral_code 
+        FROM users WHERE user_id = $1
+    """, data.user_id)
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Generate magic link token (short-lived JWT)
+    token_data = {
+        "sub": user['user_id'],
+        "user_id": user['user_id'],
+        "username": user['username'],
+        "type": "magic_link",
+        "created_by": "bot"
+    }
+    
+    # Create token with short expiry (15 minutes)
+    magic_token = create_jwt_token(token_data, expires_minutes=15)
+    
+    # Build magic link URL
+    portal_url = settings.portal_url or settings.frontend_url or "https://portal.example.com"
+    magic_link = f"{portal_url}/auth/magic?token={magic_token}"
+    
+    # Store magic link for one-time use (optional - depends on your auth flow)
+    link_id = str(uuid.uuid4())
+    try:
+        await execute('''
+            INSERT INTO magic_links (link_id, user_id, token_hash, expires_at, created_at)
+            VALUES ($1, $2, $3, NOW() + INTERVAL '15 minutes', NOW())
+        ''', link_id, user['user_id'], hashlib.sha256(magic_token.encode()).hexdigest()[:64])
+    except Exception as e:
+        # Table may not exist - that's ok, token is self-contained
+        logger.debug(f"Could not store magic link: {e}")
+    
+    return {
+        "success": True,
+        "magic_link": magic_link,
+        "expires_in_seconds": 900,  # 15 minutes
+        "message": "Magic link generated successfully"
+    }
+
+
+class WithdrawalPreviewRequest(BaseModel):
+    """Bot withdrawal preview request"""
+    user_id: str = Field(..., description="User ID")
+    game_name: str = Field(..., description="Game name for withdrawal rules")
+
+
+@router.post(
+    "/withdrawal/preview",
+    summary="Preview withdrawal/cashout rules",
+    description="Get cashout calculation preview for a user"
+)
+async def preview_withdrawal_bot(
+    request: Request,
+    data: WithdrawalPreviewRequest,
+    authorization: str = Header(..., alias="Authorization")
+):
+    """
+    Preview what would happen if user withdraws now.
+    Returns cashout rules and calculation based on last deposit.
+    """
+    await require_bot_auth(authorization)
+    await check_rate_limiting(request)
+    
+    # Get user
+    user = await fetch_one("""
+        SELECT user_id, username, real_balance, bonus_balance, 
+               deposit_count, total_deposited, withdraw_locked
+        FROM users WHERE user_id = $1
+    """, data.user_id)
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Get game rules
+    game = await fetch_one("""
+        SELECT game_name, display_name, withdrawal_rules 
+        FROM games WHERE LOWER(game_name) = LOWER($1)
+    """, data.game_name)
+    
+    # Default rules
+    min_multiplier = 1.0
+    max_multiplier = 3.0
+    
+    # Override with game-specific rules if available
+    if game and game.get('withdrawal_rules'):
+        withdrawal_rules = game['withdrawal_rules']
+        if isinstance(withdrawal_rules, str):
+            withdrawal_rules = json.loads(withdrawal_rules)
+        min_multiplier = withdrawal_rules.get('min_multiplier_of_deposit', min_multiplier)
+        max_multiplier = withdrawal_rules.get('max_multiplier_of_deposit', max_multiplier)
+    
+    # Get last deposit for this game
+    last_deposit = await fetch_one("""
+        SELECT amount FROM orders 
+        WHERE user_id = $1 AND LOWER(game_name) = LOWER($2) 
+        AND order_type = 'deposit' AND status IN ('approved', 'completed', 'APPROVED_EXECUTED')
+        ORDER BY created_at DESC LIMIT 1
+    """, data.user_id, data.game_name)
+    
+    # Calculate
+    real_balance = float(user['real_balance'] or 0)
+    bonus_balance = float(user['bonus_balance'] or 0)
+    total_balance = real_balance + bonus_balance
+    
+    last_deposit_amount = float(last_deposit['amount']) if last_deposit else 0
+    min_cashout = last_deposit_amount * min_multiplier
+    max_cashout = last_deposit_amount * max_multiplier
+    
+    # Eligibility check
+    can_withdraw = True
+    block_reason = None
+    
+    if user.get('withdraw_locked'):
+        can_withdraw = False
+        block_reason = "Withdrawals are locked for this account"
+    elif last_deposit_amount == 0:
+        can_withdraw = False
+        block_reason = "No approved deposit found. You must deposit first."
+    elif total_balance < min_cashout:
+        can_withdraw = False
+        block_reason = f"Balance ${total_balance:.2f} is below minimum cashout ${min_cashout:.2f} ({min_multiplier}x of last deposit)"
+    
+    # Calculate payout and void
+    payout_amount = min(total_balance, max_cashout) if can_withdraw else 0
+    void_amount = max(0, total_balance - max_cashout) if can_withdraw and total_balance > max_cashout else 0
+    
+    return {
+        "success": True,
+        "can_withdraw": can_withdraw,
+        "block_reason": block_reason,
+        "current_balance": {
+            "real": round(real_balance, 2),
+            "bonus": round(bonus_balance, 2),
+            "total": round(total_balance, 2)
+        },
+        "last_deposit_amount": round(last_deposit_amount, 2),
+        "min_multiplier": min_multiplier,
+        "max_multiplier": max_multiplier,
+        "min_cashout": round(min_cashout, 2),
+        "max_cashout": round(max_cashout, 2),
+        "payout_amount": round(payout_amount, 2),
+        "void_amount": round(void_amount, 2),
+        "void_reason": "EXCEEDS_MAX_CASHOUT" if void_amount > 0 else None,
+        "explanation": f"Minimum cashout is {min_multiplier}x your last deposit. Maximum cashout is {max_multiplier}x your last deposit. Any amount above {max_multiplier}x will be voided.",
+        "game_name": data.game_name,
+        "game_display_name": game['display_name'] if game else data.game_name
+    }
